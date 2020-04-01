@@ -31,6 +31,8 @@ namespace SimpleAdsNew.Controllers
             });
         }
 
+
+
         public IActionResult NewAd()
         {
             return View();
