@@ -20,7 +20,9 @@ namespace SimpleAdsNew.Controllers
             SimpleAdDb db = new SimpleAdDb(_connectionString);
             IEnumerable<SimpleAd> ads = db.GetAds();
             List<int> ids = HttpContext.Session.Get<List<int>>("ListingIds");
-            
+
+            List<AdViewModel> adViewModels = new List<AdViewModel>();
+
             return View(new HomePageViewModel
             {
                 Ads = ads.Select(ad => new AdViewModel
@@ -30,8 +32,6 @@ namespace SimpleAdsNew.Controllers
                 })
             });
         }
-
-
 
         public IActionResult NewAd()
         {
@@ -57,8 +57,13 @@ namespace SimpleAdsNew.Controllers
         [HttpPost]
         public IActionResult DeleteAd(int id)
         {
-            SimpleAdDb db = new SimpleAdDb(_connectionString);
-            db.Delete(id);
+            List<int> ids = HttpContext.Session.Get<List<int>>("ListingIds");
+            if (ids != null && ids.Contains(id))
+            {
+                SimpleAdDb db = new SimpleAdDb(_connectionString);
+                db.Delete(id);
+            }
+
             return Redirect("/homesession/index");
         }
     }
