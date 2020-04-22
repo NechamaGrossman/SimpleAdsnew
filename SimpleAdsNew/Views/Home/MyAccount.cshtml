@@ -1,0 +1,25 @@
+﻿@using Microsoft.AspNetCore.Mvc;
+@using SimpleAdsNew.Data;
+@model List<SimpleAd>
+
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        @foreach (SimpleAd s in Model)
+        {
+            <div class="well">
+                @if (!string.IsNullOrEmpty(s.Name))
+                {
+                    <h5>Listed by @s.Name</h5>
+                }
+                <h5>Phone Number: @s.PhoneNumber</h5>
+                <h3>Details:</h3>
+                <p>@s.Description</p>
+               
+                    <form method="post" action="/home/deletead">
+                        <input type="hidden" name="id" value="@s.Id" />
+                        <button class="btn btn-danger">Delete</button>
+                    </form>
+            </div>
+        }
+    </div>
+</div>

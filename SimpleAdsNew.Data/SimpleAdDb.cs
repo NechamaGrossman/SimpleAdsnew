@@ -18,8 +18,8 @@ namespace SimpleAdsNew.Data
             using (SqlConnection connection = new SqlConnection(_connectionString))
             using (SqlCommand command = connection.CreateCommand())
             {
-                command.CommandText = "INSERT INTO Ads (Description, Name, PhoneNumber, DateCreated) " +
-                                      "VALUES (@desc, @name, @phone, GETDATE()) SELECT SCOPE_IDENTITY()";
+                command.CommandText = "INSERT INTO Ads (Description, Name, PhoneNumber, UserId) " +
+                                      "VALUES (@desc, @name, @phone, @userId) SELECT SCOPE_IDENTITY()";
                 command.Parameters.AddWithValue("@desc", ad.Description);
                 object name = ad.Name;
                 if (name == null)
@@ -28,6 +28,7 @@ namespace SimpleAdsNew.Data
                 }
                 command.Parameters.AddWithValue("@name", name);
                 command.Parameters.AddWithValue("@phone", ad.PhoneNumber);
+                command.Parameters.AddWithValue("@userId", ad.UserId);
                 connection.Open();
                 ad.Id = (int)(decimal)command.ExecuteScalar();
             }
@@ -38,7 +39,7 @@ namespace SimpleAdsNew.Data
             using (SqlConnection connection = new SqlConnection(_connectionString))
             using (SqlCommand command = connection.CreateCommand())
             {
-                command.CommandText = "SELECT * FROM Ads ORDER BY DateCreated DESC";
+                command.CommandText = "SELECT * FROM Ads ";
                 connection.Open();
                 List<SimpleAd> ads = new List<SimpleAd>();
                 SqlDataReader reader = command.ExecuteReader();
@@ -88,9 +89,9 @@ namespace SimpleAdsNew.Data
             {
                 Name = reader.Get<string>("Name"),
                 Description = reader.Get<string>("Description"),
-                Date = reader.Get<DateTime>("DateCreated"),
                 PhoneNumber = reader.Get<string>("PhoneNumber"),
-                Id = reader.Get<int>("Id")
+                Id = reader.Get<int>("Id"),
+                UserId = reader.Get<int>("UserId")
             };
             return ad;
         }

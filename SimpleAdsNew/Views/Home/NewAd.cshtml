@@ -1,6 +1,7 @@
-﻿<div class="row">
+﻿@model int
+<div class="row">
     <div class="col-md-6 col-md-offset-3">
-        <h2>New Ad (Cookies)</h2>
+        <h2>New Ad</h2>
     </div>
 </div>
 
@@ -9,10 +10,13 @@
         <form method="post" action="/home/newad">
             <div class="row">
                 <div class="col-md-6">
-                    <input type="text" placeholder="Name" class="form-control" name="name"/>
+                    <input type="text" placeholder="Name" class="form-control" name="name" />
                 </div>
                 <div class="col-md-6">
-                    <input type="text" placeholder="Phone Number" class="form-control" name="phonenumber"/>
+                    <input type="text" placeholder="Phone Number" class="form-control" name="phonenumber" />
+                </div>
+                <div class="col-md-6">
+                    <input type="hidden" placeholder="Phone Number" value="@Model"class="form-control" name="UserId" />
                 </div>
             </div>
             <br/>

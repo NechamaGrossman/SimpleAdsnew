@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -18,58 +19,84 @@ namespace SimpleAdsNew.Controllers
         public IActionResult Index()
         {
             SimpleAdDb db = new SimpleAdDb(_connectionString);
+            UserDb userDB = new UserDb(_connectionString);
             IEnumerable<SimpleAd> ads = db.GetAds();
-            List<string> ids = new List<string>();
-            if (Request.Cookies["AdIds"] != null)
+            List<AdViewModel> a = new List<AdViewModel>();
+            bool Delete = false;
+            if (User.Identity.Name != null)
             {
-                ids = Request.Cookies["AdIds"].Split(',').ToList();
-            }
-
-            var vm = new HomePageViewModel
-            {
-                Ads = ads.Select(ad => new AdViewModel
+                foreach (SimpleAd s in ads)
                 {
-                    Ad = ad,
-                    CanDelete = ids.Contains(ad.Id.ToString())
-                })
-            };
-            if (TempData["message"] != null)
-            {
-                vm.Message = (string)TempData["Message"];
+                    if(s.UserId == userDB.GetByEmail(User.Identity.Name).Id)
+                    {
+                        Delete = true;
+                    }
+                    AdViewModel avm = new AdViewModel
+                    {
+                        Ad = s,
+                        CanDelete = Delete
+                    };
+                    a.Add(avm);
+
+                }
             }
-
-
-            return View(vm);
+            else
+            {
+                foreach (SimpleAd s in ads)
+                {
+                    AdViewModel avm = new AdViewModel
+                    {
+                        Ad = s,
+                        CanDelete = false
+                    };
+                    a.Add(avm);
+                }
+                
+            }
+            
+        return View(a);
         }
 
         public IActionResult NewAd()
         {
-            return View();
+            UserDb userDB = new UserDb(_connectionString);
+            int Id = userDB.GetByEmail(User.Identity.Name).Id;
+            return View(Id);
         }
-
+        [Authorize]
         [HttpPost]
         public ActionResult NewAd(SimpleAd ad)
         {
             SimpleAdDb db = new SimpleAdDb(_connectionString);
+            UserDb userDB = new UserDb(_connectionString);
+            ad.UserId = userDB.GetByEmail(User.Identity.Name).Id;
             db.AddSimpleAd(ad);
-            string ids = "";
-            var cookie = Request.Cookies["AdIds"];
-            if (cookie != null)
-            {
-                ids = $"{cookie},";
-            }
-            ids += ad.Id;
-            Response.Cookies.Append("AdIds", ids);
 
             return Redirect("/");
         }
-
+        [Authorize]
         [HttpPost]
         public IActionResult DeleteAd(int id)
         {
             SimpleAdDb db = new SimpleAdDb(_connectionString);
             db.Delete(id);
             return Redirect("/");
+        }
+        [Authorize]
+        public IActionResult MyAccount()
+        {
+            SimpleAdDb db = new SimpleAdDb(_connectionString);
+            UserDb userDB = new UserDb(_connectionString);
+            List<SimpleAd> myAds = new List<SimpleAd>();
+            IEnumerable<SimpleAd> ads = db.GetAds();
+            foreach(SimpleAd a in ads)
+            {
+                if(a.UserId == userDB.GetByEmail(User.Identity.Name).Id)
+                {
+                    myAds.Add(a);
+                }
+            }
+            return View(myAds);
         }
     }
 
